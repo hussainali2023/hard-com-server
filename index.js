@@ -24,12 +24,50 @@ async function run() {
   try {
     const usersCollection = client.db("hard-com").collection("users");
     const productsCollection = client.db("hard-com").collection("all-products");
+
     app.post("/adduser", async (req, res) => {
       const user = req.body;
       console.log(user);
       const result = await usersCollection.insertOne(user);
       res.send(result);
     });
+
+    app.delete("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    app.get("/users/buyer", async (req, res) => {
+      const query = {
+        role: "buyer",
+      };
+      const users = await usersCollection.find(query).toArray();
+      res.send(users);
+    });
+    app.get("/users/seller", async (req, res) => {
+      const query = {
+        role: "seller",
+      };
+      const users = await usersCollection.find(query).toArray();
+      res.send(users);
+    });
+
+    app.get("/users/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const user = await usersCollection.findOne(query);
+      res.send({ isAdmin: user?.role === "admin" });
+    });
+
+    app.get("/users/seller/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const user = await usersCollection.findOne(query);
+      res.send({ isSeller: user?.role === "seller" });
+    });
+
     app.get("/all-products", async (req, res) => {
       const query = {};
       const products = await productsCollection.find(query).toArray();
