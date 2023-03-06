@@ -22,8 +22,14 @@ console.log(uri);
 
 async function run() {
   try {
+    const usersCollection = client.db("hard-com").collection("users");
     const productsCollection = client.db("hard-com").collection("all-products");
-
+    app.post("/adduser", async (req, res) => {
+      const user = req.body;
+      console.log(user);
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    });
     app.get("/all-products", async (req, res) => {
       const query = {};
       const products = await productsCollection.find(query).toArray();
@@ -31,7 +37,7 @@ async function run() {
     });
 
     app.get("/category/keyboard", async (req, res) => {
-      const query = { type: "keyword" };
+      const query = { type: "keyboard" };
       const keyboards = await productsCollection.find(query).toArray();
       res.send(keyboards);
     });
@@ -40,6 +46,17 @@ async function run() {
       const query = { type: "monitor" };
       const keyboards = await productsCollection.find(query).toArray();
       res.send(keyboards);
+    });
+
+    app.get("/category/motherboard", async (req, res) => {
+      const query = { type: "motherboard" };
+      const motherboards = await productsCollection.find(query).toArray();
+      res.send(motherboards);
+    });
+    app.get("/category/cabinet", async (req, res) => {
+      const query = { type: "cabinet" };
+      const cabinets = await productsCollection.find(query).toArray();
+      res.send(cabinets);
     });
   } catch (data) {
     console.log(data);
