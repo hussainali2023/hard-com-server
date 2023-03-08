@@ -24,6 +24,7 @@ async function run() {
   try {
     const usersCollection = client.db("hard-com").collection("users");
     const productsCollection = client.db("hard-com").collection("all-products");
+    const categoryCollections = client.db("hard-com").collection("category");
 
     app.post("/adduser", async (req, res) => {
       const user = req.body;
@@ -72,6 +73,33 @@ async function run() {
       const query = {};
       const products = await productsCollection.find(query).toArray();
       res.send(products);
+    });
+
+    app.post("/all-products", async (req, res) => {
+      const products = req.body;
+      const result = await productsCollection.insertOne(products);
+      res.send(result);
+    });
+
+    app.get("/category", async (req, res) => {
+      const query = {};
+      const categories = await categoryCollections.find(query).toArray();
+      res.send(categories);
+    });
+    app.post("/category", async (req, res) => {
+      const category = req.body;
+      console.log(category);
+      const result = await categoryCollections.insertOne(category);
+      res.send(result);
+    });
+
+    app.get("/category/type/:type", async (req, res) => {
+      const type = req.params.type;
+      const query = {
+        type: type,
+      };
+      const result = await productsCollection.find(query).toArray();
+      return res.send(result);
     });
 
     app.get("/category/keyboard", async (req, res) => {
