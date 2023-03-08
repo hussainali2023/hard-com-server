@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 // const jwt = require("jsonwebtoken");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const port = process.env.PORT || 5000;
 
@@ -25,7 +25,7 @@ async function run() {
     const usersCollection = client.db("hard-com").collection("users");
     const productsCollection = client.db("hard-com").collection("all-products");
     const categoryCollections = client.db("hard-com").collection("category");
-
+    const bookingCollection = client.db("hard-com").collection("bookings");
     app.post("/adduser", async (req, res) => {
       const user = req.body;
       console.log(user);
@@ -75,6 +75,18 @@ async function run() {
       res.send(products);
     });
 
+    app.get("/product/popular", async (req, res) => {
+      const query = { popular: true };
+      const products = await productsCollection.find(query).toArray();
+      res.send(products);
+    });
+
+    app.get("/product/latest", async (req, res) => {
+      const query = { latest: true };
+      const products = await productsCollection.find(query).toArray();
+      res.send(products);
+    });
+
     app.post("/all-products", async (req, res) => {
       const products = req.body;
       const result = await productsCollection.insertOne(products);
@@ -102,6 +114,13 @@ async function run() {
       return res.send(result);
     });
 
+    app.get("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await productsCollection.find(query).toArray();
+      return res.send(result);
+    });
+
     app.get("/category/keyboard", async (req, res) => {
       const query = { type: "keyboard" };
       const keyboards = await productsCollection.find(query).toArray();
@@ -123,6 +142,24 @@ async function run() {
       const query = { type: "cabinet" };
       const cabinets = await productsCollection.find(query).toArray();
       res.send(cabinets);
+    });
+    // app.get("/search/:key", async (req, res) => {
+    //   let data = await productsCollection.find({
+    //     $or: [{ name: { $regex: req.params.key } }],
+    //   });
+    //   res.send(data);
+    // });
+    app.post("/bookings", async (req, res) => {
+      const booking = req.body;
+      const result = await bookingCollection.insertOne(booking);
+      res.send(result);
+    });
+
+    app.get("/bookings", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const bookings = await bookingCollection.find(query).toArray();
+      res.send(bookings);
     });
   } catch (data) {
     console.log(data);
